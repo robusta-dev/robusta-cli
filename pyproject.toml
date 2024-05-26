@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "robusta-cli"
-version = "0.1.0"
+version = "0.0.0"
 description = ""
 authors = ["Natan Yellin <aantn@users.noreply.github.com>"]
 readme = "README.md"

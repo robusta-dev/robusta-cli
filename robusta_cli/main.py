@@ -1,7 +1,6 @@
 import base64
 import json
 import os
-import random
 import subprocess
 import time
 import traceback
@@ -11,11 +10,12 @@ from typing import Dict, List, Optional, Union
 import certifi
 import typer
 import yaml
-# from hikaru.model.rel_1_26 import Container, Job, JobSpec, ObjectMeta, PodSpec, PodTemplateSpec, SecurityContext
-# from kubernetes import client, config
+
 from pydantic import BaseModel, Extra
 
-# from robusta._version import __version__
+import importlib.metadata
+__version__ = importlib.metadata.version("robusta-cli")
+
 from auth import app as auth_commands
 from backend_profile import backend_profile
 from eula import handle_eula
@@ -26,13 +26,12 @@ from self_host import app as self_host_commands
 from slack_feedback_message import SlackFeedbackMessagesSender
 from slack_verification import verify_slack_channel
 from utils import get_runner_pod, log_title, namespace_to_kubectl
-from robusta.core.sinks.msteams.msteams_sink_params import MsTeamsSinkConfigWrapper, MsTeamsSinkParams
-from robusta.core.sinks.robusta.robusta_sink_params import RobustaSinkConfigWrapper, RobustaSinkParams
-from robusta.core.sinks.slack.slack_sink_params import SlackSinkConfigWrapper, SlackSinkParams
-from robusta.integrations.prometheus.utils import AlertManagerDiscovery
+from simple_sink_config import MsTeamsSinkConfigWrapper, MsTeamsSinkParams
+from simple_sink_config import RobustaSinkConfigWrapper, RobustaSinkParams
+from simple_sink_config import SlackSinkConfigWrapper, SlackSinkParams
+# from demo_alert import create_demo_alert, AlertManagerException
 
 ADDITIONAL_CERTIFICATE: str = os.environ.get("CERTIFICATE", "")
-# TODO - separate shared classes to a separated shared repo, to remove dependencies between the cli and runner
 
 
 def cert_already_exists(new_cert: bytes) -> bool:
@@ -415,96 +414,16 @@ def demo_alert(
     Create a demo alert on AlertManager.
     The alert pod is selected randomly from the pods in the current namespace
     """
-    config.load_kube_config(kube_config)
-    if not alertmanager_url:
-        # search cluster alertmanager by known alertmanager labels
-        alertmanager_url = AlertManagerDiscovery.find_alert_manager_url()
-        if not alertmanager_url:
-            typer.secho(
-                "Alertmanager service could not be auto-discovered. " "Please use the --alertmanager-url parameter",
-                fg="red",
-            )
-            return
-
-    pod = None
-    for namespace in namespaces:
-        pods = client.CoreV1Api().list_namespaced_pod(namespace)
-        if pods.items:
-            pod = pods.items[0]
-            break
-
-    if not pod:
+    try:
+        pod_name, namespace = create_demo_alert(alertmanager_url, namespaces, alert, labels, kube_config, image)
         typer.secho(
-            f"Could not find any pod on namespace {namespaces}"
-            f"Please use the --namespaces parameter to specify a namespace with pods",
-            fg="red",
+            f"Created Alertmanager alert: alert-name: {alert} pod: {pod_name} "
+            f"namespace: {namespace}",
+            fg="green",
         )
-        return
-
-    alert_labels = {
-        "alertname": alert,
-        "severity": "critical",
-        "pod": pod.metadata.name,
-        "namespace": pod.metadata.namespace,
-    }
-    if labels:
-        for label in labels.split(","):
-            label_key = label.split("=")[0].strip()
-            label_value = label.split("=")[1].strip()
-            alert_labels[label_key] = label_value
-
-    demo_alerts = [
-        {
-            "status": "firing",
-            "labels": alert_labels,
-            "annotations": {
-                "summary": "This is a demo alert manager alert created by Robusta",
-                "description": "Nothing wrong here. This alert will be resolved soon",
-            },
-        }
-    ]
-
-    command = [
-        "curl",
-        "-X",
-        "POST",
-        f"{alertmanager_url}/api/v1/alerts",
-        "-H",
-        "Content-Type: application/json",
-        "-d",
-        f"{json.dumps(demo_alerts)}",
-    ]
-
-    job: Job = Job(
-        metadata=ObjectMeta(
-            name=f"alert-job-{random.randint(0, 10000)}",
-            namespace=pod.metadata.namespace,
-        ),
-        spec=JobSpec(
-            template=PodTemplateSpec(
-                spec=PodSpec(
-                    containers=[
-                        Container(
-                            name="alert-curl",
-                            image=image,
-                            command=command,
-                            securityContext=SecurityContext(runAsUser=2000),
-                        )
-                    ],
-                    restartPolicy="Never",
-                ),
-            ),
-            completions=1,
-            ttlSecondsAfterFinished=0,  # delete immediately when finished
-        ),
-    )
-    job.create()
-    typer.secho(
-        f"Created Alertmanager alert: alert-name: {alert} pod: {pod.metadata.name} "
-        f"namespace: {pod.metadata.namespace}",
-        fg="green",
-    )
-    typer.echo("\n")
+        typer.echo("\n")
+    except AlertManagerException as e:
+        typer.secho(e.message, fg="red")
 
 
 if __name__ == "__main__":
