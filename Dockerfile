@@ -31,14 +31,6 @@ RUN apt-get update \
        unzip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       curl \
-       gnupg \
-       lsb-release \
-       unzip \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Google Cloud SDK and Gcloud Auth Plugin
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
     && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
