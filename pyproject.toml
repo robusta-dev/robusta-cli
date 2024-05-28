@@ -19,6 +19,8 @@ requests = "^2.32.2"
 certifi = "^2024.2.2"
 types-toml = "^0.10.2"
 toml = "^0.10.2"
+hikaru-model-28 = "^1.1.0"
+kubernetes = "^29"
 
 
 [build-system]
