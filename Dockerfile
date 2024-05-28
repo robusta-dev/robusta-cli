@@ -10,7 +10,7 @@ ENV PATH="/app/venv/bin:$PATH"
 
 WORKDIR /app
 
-RUN pip install poetry
+RUN pip install poetry==1.8.2
 
 COPY pyproject.toml poetry.lock ./
 
@@ -55,5 +55,7 @@ ENV PATH="/venv/bin:$PATH"
 
 COPY ./robusta_cli ./robusta_cli
 COPY --from=builder /app/venv /venv
+
+ENV PYTHONPATH=$PYTHONPATH:.
 
 ENTRYPOINT [ "python", "/app/robusta_cli/main.py"]
