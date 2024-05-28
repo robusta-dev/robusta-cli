@@ -9,8 +9,8 @@ from typing import Tuple
 import requests
 import typer
 
-from backend_profile import backend_profile
-from utils import log_title
+from robusta_cli.backend_profile import backend_profile
+from robusta_cli.utils import log_title
 
 app = typer.Typer(add_completion=False)
 

@@ -14,9 +14,9 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 from dpath.util import get
 from pydantic import BaseModel
 
-from backend_profile import backend_profile
-from playbooks_cmd import NAMESPACE_EXPLANATION, get_playbooks_config
-from utils import exec_in_robusta_runner_output, namespace_to_kubectl
+from robusta_cli.backend_profile import backend_profile
+from robusta_cli.playbooks_cmd import NAMESPACE_EXPLANATION, get_playbooks_config
+from robusta_cli.utils import exec_in_robusta_runner_output, namespace_to_kubectl
 
 AUTH_SECRET_NAME = "robusta-auth-config-secret"
 app = typer.Typer(add_completion=False)

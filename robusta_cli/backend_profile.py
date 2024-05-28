@@ -4,7 +4,7 @@ import sys
 import typer
 from pydantic.main import BaseModel
 
-from utils import host_for_params
+from robusta_cli.utils import host_for_params
 
 ROBUSTA_BACKEND_PROFILE = os.environ.get("ROBUSTA_BACKEND_PROFILE", "")
 

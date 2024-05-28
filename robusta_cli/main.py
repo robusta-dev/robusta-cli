@@ -13,23 +13,22 @@ import yaml
 
 from pydantic import BaseModel, Extra
 
-import importlib.metadata
-__version__ = importlib.metadata.version("robusta-cli")
+from robusta_cli._version import __version__
 
-from auth import app as auth_commands
-from backend_profile import backend_profile
-from eula import handle_eula
-from integrations_cmd import app as integrations_commands
-from integrations_cmd import get_slack_key, get_ui_key
-from playbooks_cmd import app as playbooks_commands
-from self_host import app as self_host_commands
-from slack_feedback_message import SlackFeedbackMessagesSender
-from slack_verification import verify_slack_channel
-from utils import get_runner_pod, log_title, namespace_to_kubectl
-from simple_sink_config import MsTeamsSinkConfigWrapper, MsTeamsSinkParams
-from simple_sink_config import RobustaSinkConfigWrapper, RobustaSinkParams
-from simple_sink_config import SlackSinkConfigWrapper, SlackSinkParams
-# from demo_alert import create_demo_alert, AlertManagerException
+from robusta_cli.auth import app as auth_commands
+from robusta_cli.backend_profile import backend_profile
+from robusta_cli.eula import handle_eula
+from robusta_cli.integrations_cmd import app as integrations_commands
+from robusta_cli.integrations_cmd import get_slack_key, get_ui_key
+from robusta_cli.playbooks_cmd import app as playbooks_commands
+from robusta_cli.self_host import app as self_host_commands
+from robusta_cli.slack_feedback_message import SlackFeedbackMessagesSender
+from robusta_cli.slack_verification import verify_slack_channel
+from robusta_cli.utils import get_runner_pod, log_title, namespace_to_kubectl
+from robusta_cli.simple_sink_config import MsTeamsSinkConfigWrapper, MsTeamsSinkParams
+from robusta_cli.simple_sink_config import RobustaSinkConfigWrapper, RobustaSinkParams
+from robusta_cli.simple_sink_config import SlackSinkConfigWrapper, SlackSinkParams
+from robusta_cli.demo_alert import create_demo_alert, AlertManagerException
 
 ADDITIONAL_CERTIFICATE: str = os.environ.get("CERTIFICATE", "")
 
@@ -338,7 +337,7 @@ def update_config(
 def version():
     """Show the version of the local robusta-cli"""
     if __version__ == "0.0.0":
-        typer.echo("running with development version from git")
+        typer.echo("running with development version from git (0.0.0)")
     else:
         typer.echo(f"version {__version__}")
 

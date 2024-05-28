@@ -9,8 +9,8 @@ import typer
 import yaml
 from pydantic import BaseModel
 
-from backend_profile import BackendProfile
-from utils import host_for_params
+from robusta_cli.backend_profile import BackendProfile
+from robusta_cli.utils import host_for_params
 
 ISSUER: str = "supabase"
 

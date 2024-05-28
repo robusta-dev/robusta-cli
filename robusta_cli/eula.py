@@ -1,7 +1,7 @@
 import requests
 import typer
 
-from backend_profile import backend_profile
+from robusta_cli.backend_profile import backend_profile
 
 
 def handle_eula(account_id, robusta_api_key, cloud_routing_enabled):

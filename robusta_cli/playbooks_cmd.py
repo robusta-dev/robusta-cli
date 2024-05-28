@@ -12,7 +12,7 @@ import click_spinner
 import typer
 import yaml
 
-from utils import (
+from robusta_cli.utils import (
     PLAYBOOKS_DIR,
     _build_exec_command,
     exec_in_robusta_runner,
