@@ -69,8 +69,8 @@ class GlobalConfig(BaseModel):
 class HelmValues(BaseModel, extra=Extra.allow):
     globalConfig: GlobalConfig
     sinksConfig: List[Union[SlackSinkConfigWrapper, RobustaSinkConfigWrapper, MsTeamsSinkConfigWrapper]]
-    clusterName: Optional[str]
-    isSmallCluster: Optional[bool]
+    clusterName: Optional[str] = None
+    isSmallCluster: Optional[bool] = None
     enablePrometheusStack: bool = False
     disableCloudRouting: bool = False
     enablePlatformPlaybooks: bool = False
