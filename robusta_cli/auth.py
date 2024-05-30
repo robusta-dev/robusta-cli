@@ -86,7 +86,7 @@ def _get_signing_key_from_env_variable(namespace: Optional[str], env_var_name: s
     return str(exec_in_robusta_runner_output(f'echo "${env_var_name}"', namespace), "utf-8").strip()
 
 
-@app.command(name="web-connect")
+@app.command(name="web-connect")  # TODO consider removing this
 @app.command()
 def gen_token(
     account_id: str = typer.Option(

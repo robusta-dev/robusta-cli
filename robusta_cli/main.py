@@ -302,38 +302,6 @@ def gen_config(
 
 
 @app.command()
-def update_config(
-    existing_values: str = typer.Option(
-        ...,
-        help="Existing values.yaml file name. You can run `helm get values` to get it from the cluster.",
-    ),
-):
-    """
-    Update an existing values.yaml file.
-    Add RSA key-pair if it doesn't exist
-    Add a signing key if it doesn't exist, or replace with a valid one if the key has an invalid format
-    """
-    with open(existing_values, "r") as existing_values_file:
-        values: HelmValues = HelmValues(**yaml.safe_load(existing_values_file))
-
-        if not values.globalConfig.signing_key:
-            typer.secho("Generating signing key", fg="green")
-            values.globalConfig.signing_key = str(uuid.uuid4())
-
-        try:
-            uuid.UUID(values.globalConfig.signing_key)
-        except ValueError:
-            typer.secho("Invalid signing key. Generating a new one", fg="green")
-            values.globalConfig.signing_key = str(uuid.uuid4())
-
-        write_values_file("updated_values.yaml", values)
-        typer.secho(
-            "Run `helm upgrade robusta robusta/robusta -f ./updated_values.yaml`",
-            fg="green",
-        )
-
-
-@app.command()
 def version():
     """Show the version of the local robusta-cli"""
     if __version__ == "0.0.0":
