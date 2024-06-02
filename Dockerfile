@@ -56,6 +56,7 @@ ENV PATH="/venv/bin:$PATH"
 COPY ./robusta_cli ./robusta_cli
 COPY --from=builder /app/venv /venv
 
-ENV PYTHONPATH=$PYTHONPATH:.
+# adding /app directory to PYTHONPATH prevents ModuleNotFoundError: No module named 'robusta_cli'
+ENV PYTHONPATH=$PYTHONPATH:.:/app
 
 ENTRYPOINT [ "python", "/app/robusta_cli/main.py"]
