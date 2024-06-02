@@ -3,11 +3,10 @@ name: Release Robusta-CLI
 on:
   release:
     types: [published]
-  workflow_dispatch: # This allows manual triggering
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROD_PROJECT }}
-  RELEASE_VER : 0.0.1 # ${{ github.event.release.tag_name }}
+  RELEASE_VER : ${{ github.event.release.tag_name }}
 jobs:
 
   setup-build-publish-deploy:
@@ -65,12 +64,25 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 - --version 1.8.2
         poetry config virtualenvs.create false
         poetry install --no-dev
+        poetry publish --build -u __token__ -p ${{ secrets.PYPI_PROJECT_TOKEN }}
 
-    - name: Release Docker CLI only on formal releases
+    - name: Release Docker CLI
+      if: "!github.event.release.prerelease"
       run: |-
         docker buildx build \
         --platform linux/arm64,linux/amd64 \
-        --tag us-central1-docker.pkg.dev/genuine-flight-317411/devel/robusta-cli:dummy-${{env.RELEASE_VER}} \
+        --tag us-central1-docker.pkg.dev/genuine-flight-317411/devel/robusta-cli:${{env.RELEASE_VER}} \
+        --tag us-central1-docker.pkg.dev/genuine-flight-317411/devel/robusta-cli \
+        --push \
+        --file Dockerfile \
+        .
+
+    - name: Build Alpha Docker CLI
+      if: "github.event.release.prerelease"
+      run: |-
+        docker buildx build \
+        --platform linux/arm64,linux/amd64 \
+        --tag us-central1-docker.pkg.dev/genuine-flight-317411/devel/robusta-cli:${{env.RELEASE_VER}} \
         --push \
         --file Dockerfile \
         .
