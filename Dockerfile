@@ -39,7 +39,7 @@ RUN mkdir -p /usr/local/gcloud \
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 RUN gcloud components install gke-gcloud-auth-plugin
 RUN gcloud components remove gcloud-crc32c
-
+RUN rm /tmp/google-cloud-sdk.tar.gz
 # Install AWS CLI
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
