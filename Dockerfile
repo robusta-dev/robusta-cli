@@ -23,12 +23,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# We're installing here libexpat1, to upgrade the package to include a fix to 3 high CVEs. CVE-2024-45491,CVE-2024-45490,CVE-2024-45492
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        curl \
        gnupg \
        lsb-release \
        unzip \
+    && apt-get install -y --no-install-recommends libexpat1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Google cli so kubectl works w/ gke clusters
