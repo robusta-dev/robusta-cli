@@ -66,6 +66,10 @@ class GlobalConfig(BaseModel):
     account_id: str = ""
 
 
+class HolmesConfig(BaseModel):
+    additional_env_vars: List[Dict[str, str]]
+
+
 class HelmValues(BaseModel, extra=Extra.allow):
     globalConfig: GlobalConfig
     sinksConfig: List[Union[SlackSinkConfigWrapper, RobustaSinkConfigWrapper, MsTeamsSinkConfigWrapper]]
@@ -78,6 +82,8 @@ class HelmValues(BaseModel, extra=Extra.allow):
     kubewatch: Dict = None
     grafanaRenderer: Dict = None
     runner: Dict = None
+    enableHolmesGPT: Optional[bool] = None 
+    holmesConfig: Optional[HolmesConfig] = None
 
 
 def get_slack_channel() -> str:
@@ -283,6 +289,15 @@ def gen_config(
         kube_stack["prometheus"] = {
             "prometheusSpec": {"resources": {"requests": {"memory": "300Mi"}, "limits": {"memory": "300Mi"}}},
         }
+
+    if robusta_api_key:
+        values.enableHolmesGPT = True
+        values.holmesConfig = HolmesConfig(additional_env_vars=[
+            {
+                "name": "ROBUSTA_AI",
+                "value": "true"
+            }
+        ])
 
     write_values_file(output_path, values)
 
