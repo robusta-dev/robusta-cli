@@ -83,7 +83,7 @@ class HelmValues(BaseModel, extra=Extra.allow):
     grafanaRenderer: Dict = None
     runner: Dict = None
     enableHolmesGPT: Optional[bool] = None 
-    holmesConfig: Optional[HolmesConfig] = None
+    holmes: Optional[HolmesConfig] = None
 
 
 def get_slack_channel() -> str:
@@ -292,7 +292,7 @@ def gen_config(
 
     if robusta_api_key:
         values.enableHolmesGPT = True
-        values.holmesConfig = HolmesConfig(additional_env_vars=[
+        values.holmes = HolmesConfig(additional_env_vars=[
             {
                 "name": "ROBUSTA_AI",
                 "value": "true"
