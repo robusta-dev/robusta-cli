@@ -78,6 +78,7 @@ class HelmValues(BaseModel, extra=Extra.allow):
     enablePrometheusStack: bool = False
     disableCloudRouting: bool = False
     enablePlatformPlaybooks: bool = False
+    enabledManagedConfiguration: bool = False
     playbooksPersistentVolumeSize: str = None
     kubewatch: Dict = None
     grafanaRenderer: Dict = None
@@ -261,6 +262,7 @@ def gen_config(
         enablePrometheusStack=enable_prometheus_stack,
         disableCloudRouting=disable_cloud_routing,
         enablePlatformPlaybooks=enable_platform_playbooks,
+        enabledManagedConfiguration=True if robusta_api_key else False,
     )
 
     values.runner = {}
