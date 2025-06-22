@@ -121,7 +121,7 @@ def create_demo_alert(
         "curl",
         "-X",
         "POST",
-        f"{alertmanager_url}/api/v1/alerts",
+        f"{alertmanager_url}/api/v2/alerts",
         "-H",
         "Content-Type: application/json",
         "-d",
