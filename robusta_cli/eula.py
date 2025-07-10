@@ -4,8 +4,8 @@ import typer
 from robusta_cli.backend_profile import backend_profile
 
 
-def handle_eula(account_id, robusta_api_key, cloud_routing_enabled):
-    require_eula = robusta_api_key or cloud_routing_enabled
+def handle_eula(account_id, robusta_api_key):
+    require_eula = robusta_api_key
     if not require_eula:
         return
 
