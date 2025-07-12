@@ -76,7 +76,6 @@ class HelmValues(BaseModel, extra=Extra.allow):
     clusterName: Optional[str] = None
     isSmallCluster: Optional[bool] = None
     enablePrometheusStack: bool = False
-    disableCloudRouting: bool = False
     enablePlatformPlaybooks: bool = False
     enabledManagedConfiguration: bool = False
     playbooksPersistentVolumeSize: str = None
@@ -131,7 +130,6 @@ def gen_config(
     ),
     robusta_api_key: str = typer.Option(None),
     enable_prometheus_stack: bool = typer.Option(None),
-    disable_cloud_routing: bool = typer.Option(None),
     output_path: str = typer.Option("./generated_values.yaml", help="Output path of generated Helm values"),
     debug: bool = typer.Option(False),
     context: str = typer.Option(
@@ -218,7 +216,6 @@ def gen_config(
             RobustaSinkConfigWrapper(robusta_sink=RobustaSinkParams(name="robusta_ui_sink", token=robusta_api_key))
         ] + sinks_config
         enable_platform_playbooks = True
-        disable_cloud_routing = False
 
     slack_feedback_heads_up_message: Optional[str] = None
     # When using custom certificates we do not want to add the extra slack message.
@@ -240,12 +237,7 @@ def gen_config(
             f"""If you haven't installed it yet, Robusta can install a pre-configured {typer.style("Prometheus", fg=typer.colors.YELLOW, bold=True)}.\nWould you like to do so?"""
         )
 
-    if disable_cloud_routing is None:
-        disable_cloud_routing = not typer.confirm(
-            "Would you like to enable two-way interactivity (e.g. fix-it buttons in Slack) via Robusta's cloud?"
-        )
-
-    handle_eula(account_id, robusta_api_key, not disable_cloud_routing)
+    handle_eula(account_id, robusta_api_key)
 
     if enable_crash_report is None:
         enable_crash_report = typer.confirm(
@@ -260,7 +252,6 @@ def gen_config(
         globalConfig=GlobalConfig(signing_key=signing_key, account_id=account_id),
         sinksConfig=sinks_config,
         enablePrometheusStack=enable_prometheus_stack,
-        disableCloudRouting=disable_cloud_routing,
         enablePlatformPlaybooks=enable_platform_playbooks,
         enabledManagedConfiguration=True if robusta_api_key else False,
     )
