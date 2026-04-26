@@ -19,7 +19,7 @@ pydantic = "^1.0"
 slack-sdk = "^3"
 pyjwt = "^2.4.0"
 requests = [
-    {version = "^2.32.4", python = "<3.10"},
+    {version = ">=2.32.4", python = "<3.10"},
     {version = ">=2.33.0", python = ">=3.10"}
 ]
 certifi = "2024.7.4"
