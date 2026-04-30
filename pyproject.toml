@@ -24,7 +24,7 @@ types-toml = "^0.10.2"
 toml = "^0.10.2"
 hikaru-model-28 = "^1.1.0"
 kubernetes = "^29"
-urllib3 = ">2.6.2"
+urllib3 = ">=2.6.3"
 click = "8.1.8"
 
 
