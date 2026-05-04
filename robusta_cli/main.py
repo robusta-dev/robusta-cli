@@ -334,6 +334,10 @@ def gen_config(
                 "name": "ROBUSTA_TELEMETRY_ENDPOINT",
                 "value": backend_profile.robusta_telemetry_endpoint,
             },
+            {
+                "name": "ROBUSTA_API_ENDPOINT",
+                "value": backend_profile.robusta_cloud_api_host,
+            },
         ]
 
     if robusta_api_key:
