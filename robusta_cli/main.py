@@ -5,7 +5,8 @@ import subprocess
 import time
 import traceback
 import uuid
-from typing import Dict, List, Literal, Optional, Union
+from enum import Enum
+from typing import Dict, List, Optional, Union
 
 import certifi
 import typer
@@ -61,7 +62,10 @@ app.add_typer(auth_commands, name="auth", help="Authentication commands menu")
 app.add_typer(self_host_commands, name="self-host", help="Self-host commands menu")
 
 
-ClusterSize = Literal["small", "medium", "large"]
+class ClusterSize(str, Enum):
+    small = "small"
+    medium = "medium"
+    large = "large"
 
 # Resource configurations per cluster size (by CPU count):
 #   small:  < 16 CPUs
@@ -343,7 +347,7 @@ def gen_config(
 
     # cluster_size (new) and is_small_cluster (legacy) are mutually exclusive
     if cluster_size:
-        size_resources = CLUSTER_SIZE_RESOURCES.get(cluster_size)
+        size_resources = CLUSTER_SIZE_RESOURCES.get(cluster_size.value)
         if size_resources:
             if "kubewatch" in size_resources:
                 values.kubewatch = {"resources": size_resources["kubewatch"]}
