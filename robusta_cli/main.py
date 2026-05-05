@@ -5,6 +5,7 @@ import subprocess
 import time
 import traceback
 import uuid
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
 import certifi
@@ -61,6 +62,61 @@ app.add_typer(auth_commands, name="auth", help="Authentication commands menu")
 app.add_typer(self_host_commands, name="self-host", help="Self-host commands menu")
 
 
+class ClusterSize(str, Enum):
+    small = "small"
+    medium = "medium"
+    large = "large"
+
+# Resource configurations per cluster size (by CPU count):
+#   small:  < 16 CPUs
+#   medium: 16-128 CPUs
+#   large:  > 128 CPUs
+CLUSTER_SIZE_RESOURCES = {
+    "small": {
+        "kubewatch": {
+            "requests": {"memory": "128Mi", "cpu": "50m"},
+            "limits": {"memory": "128Mi"},
+        },
+        "runner": {
+            "requests": {"memory": "1Gi", "cpu": "100m"},
+            "limits": {"memory": "1536Mi"},
+        },
+        "holmes": {
+            "requests": {"memory": "1Gi", "cpu": "100m"},
+            "limits": {"memory": "1Gi"},
+        },
+    },
+    "medium": {
+        "kubewatch": {
+            "requests": {"memory": "256Mi", "cpu": "100m"},
+            "limits": {"memory": "256Mi"},
+        },
+        "runner": {
+            "requests": {"memory": "2Gi", "cpu": "500m"},
+            "limits": {"memory": "4Gi"},
+        },
+        "holmes": {
+            "requests": {"memory": "2Gi", "cpu": "250m"},
+            "limits": {"memory": "4Gi"},
+        },
+    },
+    "large": {
+        "kubewatch": {
+            "requests": {"memory": "1Gi", "cpu": "200m"},
+            "limits": {"memory": "1Gi"},
+        },
+        "runner": {
+            "requests": {"memory": "4Gi", "cpu": "1000m"},
+            "limits": {"memory": "6Gi"},
+        },
+        "holmes": {
+            "requests": {"memory": "2Gi", "cpu": "500m"},
+            "limits": {"memory": "4Gi"},
+        },
+    },
+}
+
+
 class GlobalConfig(BaseModel):
     signing_key: str = ""
     account_id: str = ""
@@ -68,6 +124,7 @@ class GlobalConfig(BaseModel):
 
 class HolmesConfig(BaseModel):
     additional_env_vars: List[Dict[str, str]]
+    resources: Optional[Dict] = None
 
 
 class HelmValues(BaseModel, extra=Extra.allow):
@@ -82,7 +139,7 @@ class HelmValues(BaseModel, extra=Extra.allow):
     kubewatch: Dict = None
     grafanaRenderer: Dict = None
     runner: Dict = None
-    enableHolmesGPT: Optional[bool] = None 
+    enableHolmesGPT: Optional[bool] = None
     holmes: Optional[HolmesConfig] = None
 
 
@@ -114,7 +171,11 @@ def gen_config(
     ),
     is_small_cluster: bool = typer.Option(
         None,
-        help="Local/Small cluster",
+        help="[Deprecated: use --cluster-size] Local/Small cluster",
+    ),
+    cluster_size: Optional[ClusterSize] = typer.Option(
+        None,
+        help="Cluster size: small (< 16 CPUs), medium (16-128 CPUs), large (> 128 CPUs)",
     ),
     slack_api_key: str = typer.Option(
         "",
@@ -248,7 +309,6 @@ def gen_config(
 
     values = HelmValues(
         clusterName=cluster_name,
-        isSmallCluster=is_small_cluster,
         globalConfig=GlobalConfig(signing_key=signing_key, account_id=account_id),
         sinksConfig=sinks_config,
         enablePrometheusStack=enable_prometheus_stack,
@@ -280,13 +340,6 @@ def gen_config(
             },
         ]
 
-    if is_small_cluster:
-        setattr(values, "kube-prometheus-stack", {})
-        kube_stack = getattr(values, "kube-prometheus-stack")
-        kube_stack["prometheus"] = {
-            "prometheusSpec": {"resources": {"requests": {"memory": "300Mi"}, "limits": {"memory": "300Mi"}}},
-        }
-
     if robusta_api_key:
         values.enableHolmesGPT = True
         values.holmes = HolmesConfig(additional_env_vars=[
@@ -295,6 +348,24 @@ def gen_config(
                 "value": "true"
             }
         ])
+
+    # cluster_size (new) and is_small_cluster (legacy) are mutually exclusive
+    if cluster_size:
+        size_resources = CLUSTER_SIZE_RESOURCES.get(cluster_size.value)
+        if size_resources:
+            if "kubewatch" in size_resources:
+                values.kubewatch = {"resources": size_resources["kubewatch"]}
+            if "runner" in size_resources:
+                values.runner["resources"] = size_resources["runner"]
+            if "holmes" in size_resources and values.holmes:
+                values.holmes.resources = size_resources["holmes"]
+    elif is_small_cluster:
+        values.isSmallCluster = is_small_cluster
+        setattr(values, "kube-prometheus-stack", {})
+        kube_stack = getattr(values, "kube-prometheus-stack")
+        kube_stack["prometheus"] = {
+            "prometheusSpec": {"resources": {"requests": {"memory": "300Mi"}, "limits": {"memory": "300Mi"}}},
+        }
 
     write_values_file(output_path, values)
 
