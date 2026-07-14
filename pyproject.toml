@@ -13,11 +13,11 @@ python = "^3.10, <3.13"
 typer = "^0.12.3"
 pyyaml = "^6.0.1"
 click-spinner = "^0.1.10"
-cryptography = {version = "46.0.7", python = ">=3.9.2,<3.13"}
+cryptography = {version = "48.0.1", python = ">=3.9.2,<3.13"}  # 48.0.1 fixes GHSA-537c-gmf6-5ccf (High)
 dpath = "^2.0.5"
 pydantic = "^1.0"
 slack-sdk = "^3"
-pyjwt = "^2.12.0"
+pyjwt = "^2.13.0"  # >=2.13.0 fixes CVE-2026-48526 (High)
 requests = "^2.33.0"
 certifi = "2024.7.4"
 types-toml = "^0.10.2"
